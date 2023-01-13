@@ -1,10 +1,17 @@
 // @generated automatically by Diesel CLI.
 use diesel_derive_enum::DbEnum;
 #[derive(DbEnum, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[DieselTypePath = "crate::schema::sql_types::UserRole"]
 pub enum UserRole {
     Admin,
     Developer,
     User,
+}
+
+pub mod sql_types {
+    #[derive(diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "user_role"))]
+    pub struct UserRole;
 }
 
 diesel::table! {
@@ -36,13 +43,13 @@ diesel::table! {
 
 diesel::table! {
     use diesel::sql_types::*;
-    use super::UserRoleMapping;
+    use super::sql_types::UserRole;
 
     users (id) {
         id -> Int4,
         first_name -> Varchar,
         last_name -> Varchar,
-        user_role -> UserRoleMapping,
+        user_role -> UserRole,
         added -> Timestamp,
     }
 }

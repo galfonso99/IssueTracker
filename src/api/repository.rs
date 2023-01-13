@@ -6,7 +6,7 @@ use diesel::prelude::*;
 
 use crate::schema::users::dsl::{users, first_name, last_name};
 use crate::schema::comments::dsl::{comments, parent_id, body, issue_id};
-use rocket_contrib::json::Json;
+use rocket::serde::json::Json;
 use diesel::result::Error;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -22,7 +22,7 @@ pub struct NestedComment {
     pub children: Vec<DisplayComment>,
 }
 
-pub fn fetch_comments(issue_ID: i32, conn: &PgConnection) -> Result<Json<Vec<NestedComment>>, Error> {
+pub fn fetch_comments(issue_ID: i32, conn: &mut PgConnection) -> Result<Json<Vec<NestedComment>>, Error> {
     use crate::schema::comments::dsl::id;
     let mut nested_comments: Vec<NestedComment> = vec![];
     let main_comments = comments.filter(issue_id.eq(issue_ID).and(parent_id.is_null()))
@@ -44,7 +44,7 @@ pub fn fetch_comments(issue_ID: i32, conn: &PgConnection) -> Result<Json<Vec<Nes
     Ok(Json(nested_comments))
 }
 
-pub fn fetch_child_comments(par_id: i32, conn: &PgConnection) -> Result<Vec<DisplayComment>, Error> {
+pub fn fetch_child_comments(par_id: i32, conn: &mut PgConnection) -> Result<Vec<DisplayComment>, Error> {
     use crate::schema::comments::dsl::{id, posted_at};
     let child_comments = comments.filter(parent_id.eq(par_id))
         .limit(5)
